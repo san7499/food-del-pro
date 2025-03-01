@@ -348,3 +348,4 @@ export const food_list = [
         category: "Noodles"
     }
 ]
+export const url = 'https://food-del-pro.onrender.com'
