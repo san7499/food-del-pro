@@ -1,7 +1,7 @@
 .header {
     height: 34vw;
     margin: 30px auto;
-    background: url('/frontend/src/assets/header_img.png') no-repeat center; /* Adjust the path */
+    background: url('/assets/header_img.png') no-repeat center; /* Ensure the correct relative path */
     background-size: cover;
     position: relative;
   }
