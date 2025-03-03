@@ -96,51 +96,6 @@
     background-color: darkred;
 }
 
-/* Promo Code Section */
-.cart-promocode {
-    flex: 1;
-}
-
-.cart-promocode p {
-    color: #555;
-    font-size: 14px;
-}
-
-/* Promo Code Input */
-.cart-promocode-input {
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #eaeaea;
-    border-radius: 4px;
-    padding: 5px;
-}
-
-.cart-promocode-input input {
-    background: transparent;
-    border: none;
-    outline: none;
-    padding-left: 10px;
-    flex: 1;
-    font-size: 14px;
-}
-
-/* Apply Promo Code Button */
-.cart-promocode-input button {
-    width: max(10vw, 150px);
-    padding: 12px 5px;
-    background-color: black;
-    border: none;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.cart-promocode-input button:hover {
-    background-color: grey;
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -168,9 +123,7 @@
         width: 100%;
     }
 
-    .cart-promocode-input button {
-        width: 100px;
-    }
+    
 }
 
 @media (max-width: 480px) {
@@ -191,18 +144,9 @@
         width: 40px;
     }
 
-    .cart-total,
-    .cart-promocode {
+    .cart-total {
         width: 100%;
     }
 
-    .cart-promocode-input {
-        flex-direction: column;
-        gap: 5px;
-        padding: 10px;
-    }
-
-    .cart-promocode-input button {
-        width: 100%;
-    }
+    
 }
