@@ -182,13 +182,7 @@ _Add screenshots of homepage, cart, login, admin dashboard._
 ## 👨‍💻 Author
 
 **Sanket Khapake**  
-Full Stack Developer | MERN Stack Enthusiast  
+Full Stack Developer (MERN) | Data Science & Machine Learning | Building Scalable & Data-Driven Applications  
 
 🔗 LinkedIn: https://www.linkedin.com/in/sanket-khapake  
 🐙 GitHub: https://github.com/san7499  
-
----
-
-## 📜 License
-
-This project is developed for educational and portfolio purposes.
