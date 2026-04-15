@@ -4,11 +4,11 @@ import { StoreContext } from "../../context/StoreContext";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const { cartItems, food_list, removeFromCart, getTotalCartAmount,url } = useContext(StoreContext);
+  const { cartItems = {}, food_list = [], removeFromCart, getTotalCartAmount, url } = useContext(StoreContext);
   const navigate = useNavigate();
 
-  const subtotal = getTotalCartAmount();
-  const deliveryFee = subtotal > 0 ? 2.00 : 0; // No delivery fee if cart is empty
+  const subtotal = getTotalCartAmount ? getTotalCartAmount() : 0;
+  const deliveryFee = subtotal > 0 ? 2.0 : 0;
   const total = subtotal + deliveryFee;
 
   return (
@@ -24,18 +24,28 @@ const Cart = () => {
         </div>
         <hr />
 
-        {food_list && food_list.some(item => cartItems[item._id] > 0) ? (
+        {food_list.length > 0 ? (
           food_list.map((item) => {
-            if (cartItems[item._id] > 0) {
+            const quantity = cartItems?.[item?._id] || 0;
+
+            if (quantity > 0) {
               return (
-                <div key={item._id}>
+                <div key={item?._id}>
                   <div className="cart-items-title cart-items-item">
-                    <img src={url+"/images/"+item.image} alt={item.name || "Food Item"} />
-                    <p>{item.name}</p>
-                    <p>${parseFloat(item.price || 0).toFixed(2)}</p>
-                    <p>{cartItems[item._id]}</p>
-                    <p>${(parseFloat(item.price || 0) * cartItems[item._id]).toFixed(2)}</p>
-                    <p className="cross" onClick={() => removeFromCart(item._id)} aria-label="Remove item">X</p>
+                    <img
+                      src={url + "/images/" + item?.image}
+                      alt={item?.name || "Food Item"}
+                    />
+                    <p>{item?.name}</p>
+                    <p>${parseFloat(item?.price || 0).toFixed(2)}</p>
+                    <p>{quantity}</p>
+                    <p>${(parseFloat(item?.price || 0) * quantity).toFixed(2)}</p>
+                    <p
+                      className="cross"
+                      onClick={() => removeFromCart(item?._id)}
+                    >
+                      X
+                    </p>
                   </div>
                   <hr />
                 </div>
@@ -68,10 +78,10 @@ const Cart = () => {
                 <b>${total.toFixed(2)}</b>
               </div>
             </div>
-            <button onClick={() => navigate('/order')}>PROCEED TO CHECKOUT</button>
+            <button onClick={() => navigate('/order')}>
+              PROCEED TO CHECKOUT
+            </button>
           </div>
-
-          
         </div>
       )}
     </div>
