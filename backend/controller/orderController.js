@@ -5,15 +5,13 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const frontend_url = "https://food-del-pro-frontend.onrender.com";
 
-// ✅ PLACE ORDER (FIXED)
+
 const placeOrder = async (req, res) => {
   try {
     console.log("Request body:", req.body);
 
     const { items, amount, address } = req.body;
-
-    // 🔥 FIX: get userId from token middleware
-    const userId = req.userId;
+    const userId = req.userId; // from auth middleware
 
     if (!userId || !items || !amount || !address) {
       return res.status(400).json({
@@ -22,7 +20,7 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    // ✅ Save order
+
     const newOrder = new orderModel({
       userId,
       items,
@@ -33,20 +31,22 @@ const placeOrder = async (req, res) => {
 
     await newOrder.save();
 
-    // ✅ Clear cart
+   
     await userModel.findByIdAndUpdate(userId, { cartData: {} });
 
-    // ✅ Stripe items
+ 
     const line_items = items.map((item) => ({
       price_data: {
         currency: "inr",
-        product_data: { name: item.name },
+        product_data: {
+          name: item.name,
+        },
         unit_amount: item.price * 100,
       },
       quantity: item.quantity,
     }));
 
-    // ✅ Delivery charges
+ 
     line_items.push({
       price_data: {
         currency: "inr",
@@ -56,7 +56,7 @@ const placeOrder = async (req, res) => {
       quantity: 1,
     });
 
-    // ✅ Create Stripe session
+
     const session = await stripe.checkout.sessions.create({
       line_items,
       mode: "payment",
@@ -77,4 +77,114 @@ const placeOrder = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+
+const verifyOrder = async (req, res) => {
+  try {
+    const { orderId, success } = req.body;
+
+    if (!orderId || success === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid data",
+      });
+    }
+
+    if (success === "true") {
+      await orderModel.findByIdAndUpdate(orderId, { payment: true });
+      res.json({ success: true, message: "Payment successful" });
+    } else {
+      await orderModel.findByIdAndDelete(orderId);
+      res.json({ success: false, message: "Payment failed" });
+    }
+
+  } catch (error) {
+    console.error("Verify Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Error verifying order",
+    });
+  }
+};
+
+
+const userOrders = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const orders = await orderModel.find({ userId });
+
+    res.json({
+      success: true,
+      data: orders,
+    });
+
+  } catch (error) {
+    console.error("User Orders Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Error fetching orders",
+    });
+  }
+};
+
+
+const listOrders = async (req, res) => {
+  try {
+    const orders = await orderModel.find({});
+
+    res.json({
+      success: true,
+      data: orders,
+    });
+
+  } catch (error) {
+    console.error("List Orders Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Error fetching all orders",
+    });
+  }
+};
+
+
+const updateStatus = async (req, res) => {
+  try {
+    const { orderId, status } = req.body;
+
+    if (!orderId || !status) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing data",
+      });
+    }
+
+    await orderModel.findByIdAndUpdate(orderId, { status });
+
+    res.json({
+      success: true,
+      message: "Order status updated",
+    });
+
+  } catch (error) {
+    console.error("Update Status Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Error updating status",
+    });
+  }
+};
+
+
+export {
+  placeOrder,
+  verifyOrder,
+  userOrders,
+  listOrders,
+  updateStatus,
 };
