@@ -12,7 +12,7 @@ const MyOrders = () => {
 
   const navigate = useNavigate();
 
-
+  // ✅ Fetch Orders (SAFE)
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -29,61 +29,70 @@ const MyOrders = () => {
         setOrders([]);
       }
     } catch (error) {
-      console.error("Error fetching orders:", error.response?.data || error.message);
+      console.error(
+        "Error fetching orders:",
+        error.response?.data || error.message
+      );
       setOrders([]);
     } finally {
       setLoading(false);
     }
   };
 
-
+  // ✅ Load Orders when token available
   useEffect(() => {
     if (!token) {
       navigate("/");
       return;
     }
+
     fetchOrders();
-  }, [token]);
+  }, [token, navigate]);
 
   return (
     <div className="my-orders">
       <h2>My Orders</h2>
 
- 
+      {/* ✅ Loading State */}
       {loading && <p>Loading orders...</p>}
 
-
+      {/* ✅ Empty State */}
       {!loading && orders.length === 0 && (
         <p>No orders found.</p>
       )}
 
       <div className="container">
-        {orders.map((order) => (
+        {orders?.map((order) => (
           <div key={order?._id} className="my-orders-order">
             <img src={assets.parcel_icon} alt="Parcel Icon" />
 
-
+            {/* ✅ Items List */}
             <p>
               {order?.items
-                ?.map((item) => `${item?.name} x ${item?.quantity}`)
+                ?.map(
+                  (item) =>
+                    `${item?.name || "Item"} x ${
+                      item?.quantity || 0
+                    }`
+                )
                 .join(", ")}
             </p>
 
+            {/* ✅ Amount */}
+            <p>${(order?.amount || 0).toFixed(2)}</p>
 
-            <p>${order?.amount?.toFixed(2)}</p>
+            {/* ✅ Item Count */}
+            <p>Items: {order?.items?.length || 0}</p>
 
-
-            <p>Items: {order?.items?.length}</p>
-
- 
+            {/* ✅ Status */}
             <p>
               <span>&#x25cf;</span>{" "}
               <b>{order?.status || "Processing"}</b>
             </p>
 
-
-            <button onClick={fetchOrders}>
-              Refresh Status
+            {/* ✅ Refresh Button */}
+            <button onClick={fetchOrders} disabled={loading}>
+              {loading ? "Refreshing..." : "Refresh Status"}
             </button>
           </div>
         ))}
