@@ -11,12 +11,21 @@ const placeOrder = async (req, res) => {
     console.log("Request body:", req.body);
 
     const { items, amount, address } = req.body;
-    const userId = req.userId; // from auth middleware
+    const userId = req.userId;
+
 
     if (!userId || !items || !amount || !address) {
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
+      });
+    }
+
+
+    if (amount < 50) {
+      return res.status(400).json({
+        success: false,
+        message: "Minimum order amount should be ₹50",
       });
     }
 
@@ -31,10 +40,10 @@ const placeOrder = async (req, res) => {
 
     await newOrder.save();
 
-   
+
     await userModel.findByIdAndUpdate(userId, { cartData: {} });
 
- 
+
     const line_items = items.map((item) => ({
       price_data: {
         currency: "inr",
@@ -46,7 +55,7 @@ const placeOrder = async (req, res) => {
       quantity: item.quantity,
     }));
 
- 
+
     line_items.push({
       price_data: {
         currency: "inr",
