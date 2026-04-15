@@ -5,8 +5,13 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const PlaceOrder = () => {
-  const { getTotalCartAmount, token, food_list = [], cartItems = {}, url } =
-    useContext(StoreContext);
+  const {
+    getTotalCartAmount,
+    token,
+    food_list = [],
+    cartItems = {},
+    url,
+  } = useContext(StoreContext);
 
   const navigate = useNavigate();
 
@@ -24,30 +29,41 @@ const PlaceOrder = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // ✅ Handle input
+
   const onChangeHandler = (event) => {
     const { name, value } = event.target;
     setData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Place Order
+
   const placeOrder = async (event) => {
     event.preventDefault();
 
-    // 🔴 Validation
+
     if (!token) {
       alert("Please login first");
       navigate("/");
       return;
     }
 
-    if (getTotalCartAmount() === 0) {
+    const subtotal = getTotalCartAmount();
+    const deliveryFee = subtotal > 0 ? 2 : 0;
+    const total = subtotal + deliveryFee;
+
+
+    if (subtotal === 0) {
       alert("Cart is empty");
       navigate("/cart");
       return;
     }
 
-    // ✅ Safe cart items
+ 
+    if (total < 50) {
+      alert("Minimum order amount is ₹50");
+      return;
+    }
+
+
     const orderItems = food_list
       ?.filter((item) => (cartItems?.[item?._id] || 0) > 0)
       .map((item) => ({
@@ -60,7 +76,7 @@ const PlaceOrder = () => {
     const orderData = {
       address: data,
       items: orderItems,
-      amount: getTotalCartAmount() + 2,
+      amount: total,
     };
 
     try {
@@ -75,7 +91,6 @@ const PlaceOrder = () => {
       );
 
       if (response.data?.success) {
-        // ✅ Redirect to payment page
         window.location.replace(response.data.session_url);
       } else {
         alert(response.data?.message || "Order failed");
@@ -85,14 +100,14 @@ const PlaceOrder = () => {
 
       alert(
         error.response?.data?.message ||
-          "Server error (500). Backend issue."
+          "Server error. Please try again."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Redirect protection
+
   useEffect(() => {
     if (!token) {
       navigate("/");
@@ -106,6 +121,7 @@ const PlaceOrder = () => {
   return (
     <div className="place-order-container">
       <form className="place-order" onSubmit={placeOrder}>
+        
         {/* LEFT SIDE */}
         <div className="place-order-left">
           <p className="title">Delivery Information</p>
@@ -115,7 +131,7 @@ const PlaceOrder = () => {
             <input name="lastName" onChange={onChangeHandler} value={data.lastName} placeholder="Last name" required />
           </div>
 
-          <input name="email" onChange={onChangeHandler} value={data.email} type="email" placeholder="Email" required />
+          <input name="email" type="email" onChange={onChangeHandler} value={data.email} placeholder="Email" required />
           <input name="street" onChange={onChangeHandler} value={data.street} placeholder="Street" required />
 
           <div className="multi-fields">
@@ -139,21 +155,21 @@ const PlaceOrder = () => {
             <div>
               <div className="cart-total-details">
                 <p>Subtotal</p>
-                <p>${subtotal.toFixed(2)}</p>
+                <p>₹{subtotal.toFixed(2)}</p>
               </div>
 
               <hr />
 
               <div className="cart-total-details">
                 <p>Delivery Fee</p>
-                <p>${deliveryFee.toFixed(2)}</p>
+                <p>₹{deliveryFee.toFixed(2)}</p>
               </div>
 
               <hr />
 
               <div className="cart-total-details">
                 <b>Total</b>
-                <b>${total.toFixed(2)}</b>
+                <b>₹{total.toFixed(2)}</b>
               </div>
             </div>
 
@@ -162,6 +178,7 @@ const PlaceOrder = () => {
             </button>
           </div>
         </div>
+
       </form>
     </div>
   );
